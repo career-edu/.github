@@ -1,0 +1,36 @@
+name: "데이터 정정/추가 요청"
+description: "잘못된 교육 정보 수정 또는 누락된 데이터 추가 요청"
+labels: ["type: data", "status: needs triage"]
+body:
+  - type: input
+    id: item
+    attributes:
+      label: "대상 항목/링크"
+      placeholder: "예: /courses/123 또는 원본 URL"
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: "현재 값"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "정확한 값"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "근거 자료"
+      description: "공식 페이지 링크, 캡처 등"
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "영향도"
+      options:
+        - "high"
+        - "medium"
+        - "low"

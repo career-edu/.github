@@ -1,0 +1,85 @@
+name: "버그 제보"
+description: "동작하지 않거나 예상과 다른 현상을 보고합니다"
+labels: ["type: bug", "status: needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        재현 가능한 정보와 기대 동작을 자세히 적어주세요. 스크린샷/로그를 첨부하면 큰 도움이 됩니다.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "사전 확인"
+      options:
+        - label: "중복 이슈가 아닌지 검색했습니다"
+          required: true
+        - label: "최신 브랜치/버전에서 재현을 확인했습니다"
+          required: true
+  - type: input
+    id: area
+    attributes:
+      label: "영역 (area)"
+      description: "예: 크롤러/백엔드/API/웹/데이터/추천/커뮤니티"
+      placeholder: "예: 크롤러"
+  - type: textarea
+    id: description
+    attributes:
+      label: "버그 설명"
+      description: "어떤 문제가 발생했는지 간단히 적어주세요"
+      placeholder: "예: 네이버 과정 목록 크롤링 시 404 오류 발생"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "재현 절차"
+      description: "문제를 재현하는 단계들을 순서대로 적어주세요"
+      placeholder: |
+        1. ... 페이지로 이동
+        2. ... 버튼 클릭
+        3. 오류 메시지 확인
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "기대 동작"
+      placeholder: "예: 200 응답과 함께 과정 목록이 반환되어야 함"
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "실제 동작"
+      placeholder: "예: 404 Not Found가 반환됨"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "로그/스크린샷"
+      description: "가능하다면 오류 로그, 스택트레이스, 스크린샷을 첨부해주세요"
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: "버전/커밋"
+      description: "앱/라이브러리 버전 또는 커밋 해시"
+      placeholder: "예: v0.1.0 또는 a1b2c3d"
+  - type: textarea
+    id: env
+    attributes:
+      label: "환경 정보"
+      description: "OS, 브라우저, 런타임, DB 등"
+      placeholder: "예: Ubuntu 22.04, Node 20, Chrome 127"
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "심각도"
+      options:
+        - "blocking"
+        - "high"
+        - "medium"
+        - "low"
+    validations:
+      required: true

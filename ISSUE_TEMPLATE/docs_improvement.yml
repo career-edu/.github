@@ -1,0 +1,23 @@
+name: "문서 개선"
+description: "README, 가이드, 예제 등 문서 관련 개선 제안"
+labels: ["type: docs", "status: needs triage"]
+body:
+  - type: textarea
+    id: scope
+    attributes:
+      label: "대상 문서/섹션"
+      placeholder: "예: README > 로드맵"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "개선 제안"
+      placeholder: "예: 설치 가이드에 Windows/Powershell 예시 추가"
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: "참고 자료"
+      description: "외부 레퍼런스, 좋은 예시 링크 등"

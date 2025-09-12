@@ -1,0 +1,57 @@
+name: Sync Org Labels
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: Organization name
+        required: true
+        default: career-edu
+      include_private:
+        description: Include private repositories
+        required: false
+        default: 'false'
+  schedule:
+    - cron: '0 18 * * 1'
+
+jobs:
+  list-repos:
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.get-repos.outputs.repos }}
+    steps:
+      - name: Get repositories in org
+        id: get-repos
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ORG_LABEL_TOKEN }}
+          script: |
+            const org = core.getInput('org') || process.env.GITHUB_REPOSITORY_OWNER;
+            const includePrivate = (core.getInput('include_private') || 'false') === 'true';
+            let repos = [];
+            for await (const response of github.paginate.iterator(github.rest.repos.listForOrg, { org, per_page: 100 })) {
+              for (const r of response.data) {
+                if (!includePrivate && r.private) continue;
+                if (r.archived) continue;
+                repos.push(r.full_name);
+              }
+            }
+            core.setOutput('repos', JSON.stringify(repos));
+  sync-labels:
+    needs: list-repos
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: ${{ fromJson(needs.list-repos.outputs.repos) }}
+    steps:
+      - name: Checkout .github repository
+        uses: actions/checkout@v4
+      - name: Apply labels to ${{ matrix.repo }}
+        uses: crazy-max/ghaction-github-labeler@v5
+        with:
+          github-token: ${{ secrets.ORG_LABEL_TOKEN }}
+          configuration-path: .github/labels.yml
+          repository: ${{ matrix.repo }}
+          skip-delete: false
+          dry-run: false

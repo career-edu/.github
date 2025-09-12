@@ -1,0 +1,47 @@
+name: "크롤러 추가/수정 요청"
+description: "새로운 교육 사이트 크롤러 추가 또는 기존 크롤러 수정 요청"
+labels: ["type: crawler", "status: needs triage"]
+body:
+  - type: input
+    id: source
+    attributes:
+      label: "대상 사이트/기관"
+      placeholder: "예: 고용노동부 K-디지털, 네이버 커리어"
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: "URL"
+      placeholder: "예: https://example.com/courses"
+  - type: textarea
+    id: fields
+    attributes:
+      label: "필드 요구사항"
+      description: "수집이 필요한 항목"
+      placeholder: |
+        - 과정명, 기관, 분야/직무
+        - 지원 자격, 모집 일정(시작/마감)
+        - 교육 기간, 비용/지원 여부
+        - 링크, 지역/온·오프라인, 기타
+    validations:
+      required: true
+  - type: textarea
+    id: rules
+    attributes:
+      label: "파싱 규칙/비고"
+      description: "페이지네이션, 로그인 필요 여부, API 사용 가능성 등"
+  - type: textarea
+    id: sample
+    attributes:
+      label: "샘플 데이터/스크린샷"
+      description: "가능하다면 예시를 첨부해주세요"
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: "수집 주기"
+      options:
+        - "일간"
+        - "주간"
+        - "월간"
+        - "수요 기반"

@@ -51,7 +51,7 @@ jobs:
         uses: crazy-max/ghaction-github-labeler@v5
         with:
           github-token: ${{ secrets.ORG_LABEL_TOKEN }}
-          configuration-path: .github/labels.yml
+          yaml-file: .github/labels.yml
           repository: ${{ matrix.repo }}
           skip-delete: false
           dry-run: false

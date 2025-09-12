@@ -11,6 +11,10 @@ on:
         description: Include private repositories
         required: false
         default: 'false'
+      delete_extra:
+        description: Delete labels not present in labels.yml
+        required: false
+        default: 'false'
   schedule:
     - cron: '0 18 * * 1'
 
@@ -47,11 +51,57 @@ jobs:
     steps:
       - name: Checkout .github repository
         uses: actions/checkout@v4
-      - name: Apply labels to ${{ matrix.repo }}
-        uses: crazy-max/ghaction-github-labeler@v5
+      - name: Convert labels.yml to JSON
+        run: |
+          curl -sL https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -o yq
+          chmod +x yq
+          ./yq -o=json '.github/labels.yml' > labels.json
+      - name: Upsert labels in ${{ matrix.repo }}
+        uses: actions/github-script@v7
+        env:
+          DELETE_EXTRA: ${{ inputs.delete_extra }}
         with:
           github-token: ${{ secrets.ORG_LABEL_TOKEN }}
-          yaml-file: .github/labels.yml
-          repository: ${{ matrix.repo }}
-          skip-delete: false
-          dry-run: false
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const repoFull = '${{ matrix.repo }}';
+            const [owner, repo] = repoFull.split('/');
+            const deleteExtra = (process.env.DELETE_EXTRA || 'false') === 'true';
+
+            const labels = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'labels.json'), 'utf8'));
+            if (!Array.isArray(labels)) {
+              core.setFailed('labels.json is not an array');
+            }
+
+            // Fetch existing labels
+            const existing = await github.paginate(github.rest.issues.listLabelsForRepo, { owner, repo, per_page: 100 });
+            const existingMap = new Map(existing.map(l => [l.name, l]));
+
+            // Upsert labels
+            for (const lbl of labels) {
+              const name = lbl.name;
+              const color = (lbl.color || '').replace('#','');
+              const description = lbl.description || '';
+              if (!name || !color) {
+                core.info(`Skip invalid label entry: ${JSON.stringify(lbl)}`);
+                continue;
+              }
+              if (existingMap.has(name)) {
+                await github.rest.issues.updateLabel({ owner, repo, name, color, description });
+                core.info(`Updated: ${name}`);
+              } else {
+                await github.rest.issues.createLabel({ owner, repo, name, color, description });
+                core.info(`Created: ${name}`);
+              }
+            }
+
+            if (deleteExtra) {
+              const configNames = new Set(labels.map(l => l.name));
+              for (const l of existing) {
+                if (!configNames.has(l.name)) {
+                  await github.rest.issues.deleteLabel({ owner, repo, name: l.name });
+                  core.info(`Deleted extra: ${l.name}`);
+                }
+              }
+            }
